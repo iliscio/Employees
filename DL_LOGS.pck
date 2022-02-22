@@ -1,0 +1,8 @@
+CREATE OR REPLACE Package DL_LOGS Is
+
+End DL_LOGS;
+/
+CREATE OR REPLACE Package Body DL_LOGS Is
+
+End DL_LOGS;
+/
