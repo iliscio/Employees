@@ -1,10 +1,8 @@
 CREATE OR REPLACE PACKAGE DL_EMPLOYEES IS
 
-
 /*
    This package has been created in order to store all codes that will be responsible to 
  read or write data into the database.
-
 */
 
    Type TEmployeeRec Is Record (EmpId        employees.employee_id%Type
