@@ -8,18 +8,20 @@ CREATE OR REPLACE PACKAGE DL_EMPLOYEES IS
   
 */
 
-   TYPE TEmployeeRec IS RECORD (EmpId        employees.employee_id%TYPE
-                               ,EmpFirstName employees.first_name%TYPE
-                               ,EmpLastName  employees.last_name%TYPE
-                               ,EmpMail      employees.email%TYPE
-                               ,EmpPhone     employees.phone_number%TYPE
+   Type TEmployeeRec Is Record (EmpId        employees.employee_id%Type
+                               ,EmpFirstName employees.first_name%Type
+                               ,EmpLastName  employees.last_name%Type
+                               ,EmpMail      employees.email%Type
+                               ,EmpPhone     employees.phone_number%Type
                                );
                                
-   TYPE TEmployeeList IS REF CURSOR RETURN TEmployeeRec;
+   Type TEmployeeList Is Table Of TEmployeeRec;
+                               
+   Type TEmployeeRef Is Ref Cursor Return TEmployeeRec;
 
-   FUNCTION GetEmployeesList RETURN TEmployeeList;
+   Function GetEmployeesList Return TEmployeeList;
 
-   FUNCTION GetEmployeeById(P_EMP_ID NUMBER) RETURN TEmployeeRec;
+   Function GetEmployeeById(P_EMP_ID Number) Return TEmployeeRec;
 
 
 END DL_EMPLOYEES;
@@ -27,22 +29,67 @@ END DL_EMPLOYEES;
 CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
 
 
+-- Returns a list of all Employees in the database
    FUNCTION GetEmployeesList RETURN TEmployeeList IS
    
+      V_EmployeeList TEmployeeList;
+   
    BEGIN
    
-      NULL;
-   
+      Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number 
+        Bulk Collect Into V_EmployeeList
+        From Employees Emp;
+      
+      Return V_EmployeeList;
+      
    END GetEmployeesList;
 
-   FUNCTION GetEmployeeById(P_EMP_ID NUMBER) RETURN TEmployeeRec IS
+-- Returns a Ref Cursor of all Employees in the database
+   FUNCTION GetEmployeesList_Ref RETURN TEmployeeList IS
+   
+      V_EmployeeList TEmployeeList;
    
    BEGIN
    
-      NULL;
-   
-   END GetEmployeeById;
+      Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number 
 
+        Bulk Collect Into V_EmployeeList
+        From Employees Emp;
+      
+      Return V_EmployeeList;
+      
+   END GetEmployeesList_Ref;
+
+
+-- Returns a record of an employee by Employee_Id
+   Function GetEmployeeById(P_EMP_ID Number) Return TEmployeeRec Is
+   
+      V_Employee TEmployeeRec;
+   
+   Begin
+   
+      Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number Into V_Employee
+        From Employees Emp
+       Where Emp.Employee_Id = P_EMP_ID;
+   
+      Return V_Employee;
+   
+   End GetEmployeeById;
+
+-- Returns a Ref Cursor of an employee by Employee_Id
+   Function GetEmployeeById_Ref(P_EMP_ID Number) Return TEmployeeRef Is
+
+      C_Employee TEmployeeRef;
+
+   Begin
+
+      Open C_Employee For Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number
+                            From Employees Emp
+                           Where Emp.Employee_Id = P_EMP_ID;
+
+      Return C_Employee;
+
+   End GetEmployeeById_Ref;
 
 END DL_EMPLOYEES;
 /
