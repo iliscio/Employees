@@ -28,6 +28,8 @@ CREATE OR REPLACE PACKAGE DL_EMPLOYEES IS
 
    Procedure SaveEmployee(P_EmployeeRec Employees%Rowtype);
 
+   Procedure DeleteEmployeeById(P_EmployeeId Number);
+
 END DL_EMPLOYEES;
 /
 CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
@@ -120,6 +122,19 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
       End If;
    
    End SaveEmployee;
+
+
+-- Procedure created in order to delete records from Employees Table by Employee Id
+   Procedure DeleteEmployeeById(P_EmployeeId Number) Is
+   
+   Begin
+   
+      Delete Employees Where Employee_id = P_EmployeeId;
+      
+      Commit;
+   
+   End DeleteEmployeeById;
+
 
 END DL_EMPLOYEES;
 /
