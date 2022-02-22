@@ -26,10 +26,11 @@ CREATE OR REPLACE PACKAGE DL_EMPLOYEES IS
 
    Function GetEmployeeById_Ref(P_EmployeeId Number) Return TEmployeesRef;
 
+   Procedure SaveEmployee(P_EmployeeRec Employees%Rowtype);
+
 END DL_EMPLOYEES;
 /
 CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
-
 
 -- Returns a list of all Employees in the database
    Function GetEmployeesList Return TEmployeeList Is
@@ -91,6 +92,34 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
       Return C_Employee;
 
    End GetEmployeeById_Ref;
+
+
+-- Procedure created in order to insert or update employees into the database.
+--    If the parameter P_EmployeeRec.Employee_Id is not null then the record will be updated, 
+--  otherwise it will be inserted 
+   Procedure SaveEmployee(P_EmployeeRec Employees%Rowtype) Is
+   
+      v_EmployeeRec Employees%Rowtype Default P_EmployeeRec;
+   
+   Begin
+   
+      If v_EmployeeRec.Employee_Id Is Not Null Then
+      
+         Update Employees Set Row = v_EmployeeRec Where Employee_Id = v_EmployeeRec.Employee_Id;
+
+         Commit;
+
+      Else
+
+         v_EmployeeRec.Employee_Id := EMPLOYEES_SEQ.nextval;
+
+         Insert Into Employees Values v_EmployeeRec;
+         
+         Commit;
+
+      End If;
+   
+   End SaveEmployee;
 
 END DL_EMPLOYEES;
 /
