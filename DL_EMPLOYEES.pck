@@ -37,13 +37,34 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
    
       V_EmployeeList TEmployeeList;
    
-   BEGIN
+   Begin
+   
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.GetEmployeesList function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
 
+      V_EmployeeList := Null;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Selecting all employees from Employees Table',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+                
       Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number 
         Bulk Collect Into V_EmployeeList From Employees Emp;
 
+      DL_LOGS.SaveLogs(P_logMessage   => 'Returning data from DL_EMPLOYEES.GetEmployeesList function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
       Return V_EmployeeList;
       
+   Exception
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting DL_EMPLOYEES.GetEmployeesList, an error has occurred while function execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+                          
+         Raise_Application_Error(-20001,'An error has occurred while GetEmployeesList function execution. Check the logs.',True);
    END GetEmployeesList;
 
 
@@ -54,11 +75,31 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
 
    Begin
 
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.GetEmployeesList_Ref function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      c_EmployeeList := Null;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Opening the cursor',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
       Open c_EmployeeList For Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email,
                                      Emp.Phone_Number From Employees Emp;
 
+      DL_LOGS.SaveLogs(P_logMessage   => 'Returning Memory Reference of data from DL_EMPLOYEES.GetEmployeesList_Ref',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
       Return c_EmployeeList;
 
+   Exception
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting DL_EMPLOYEES.GetEmployeesList_Ref, an error has occurred while function execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'An error has occurred while GetEmployeesList_Ref function execution. Check the logs.',True);
    End GetEmployeesList_Ref;
 
 
@@ -69,12 +110,42 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
 
    Begin
 
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.GetEmployeeById function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      V_Employee := Null;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Selecting employee from Employees Table By Id: '||P_EmployeeId,
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
       Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number Into V_Employee
         From Employees Emp
        Where Emp.Employee_Id = P_EmployeeId;
 
+      DL_LOGS.SaveLogs(P_logMessage   => 'Returning employee data from DL_EMPLOYEES.GetEmployeeById function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
       Return V_Employee;
 
+   Exception
+      When Too_Many_Rows Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Two or more employees was returned by id: '||P_EmployeeId,
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'Two or more employees was returned with the same ID. Check the logs.',True);
+      When NO_DATA_FOUND Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'No employee found with id: '||P_EmployeeId,
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'No Employee has been found. Check the logs.',True);
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting DL_EMPLOYEES.GetEmployeeById, an error has occurred while function execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'An error has occurred while GetEmployeeById function execution. Check the logs.',True);
    End GetEmployeeById;
 
 
@@ -84,13 +155,33 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
       C_Employee TEmployeesRef;
 
    Begin
+   
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.GetEmployeeById_Ref function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      C_Employee := Null;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Opening the cursor with employee_id: '||P_EmployeeId,
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
 
       Open C_Employee For Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number
                             From Employees Emp
                            Where Emp.Employee_Id = P_EmployeeId;
 
+      DL_LOGS.SaveLogs(P_logMessage   => 'Returning Memory Reference of data from DL_EMPLOYEES.GetEmployeeById_Ref',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
       Return C_Employee;
 
+   Exception
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting DL_EMPLOYEES.GetEmployeeById_Ref, an error has occurred while function execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'An error has occurred while GetEmployeeById_Ref function execution. Check the logs.',True);
    End GetEmployeeById_Ref;
 
 
