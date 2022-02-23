@@ -37,22 +37,43 @@ CREATE OR REPLACE PACKAGE BODY BL_EMPLOYEES IS
            
    Begin
 
+      DL_LOGS.SaveLogs(P_logMessage => 'Starting procedure BL_EMPLOYEES.CreateNewEmployee',P_logDbmessage => Null,P_logDate => Sysdate);
+
       DL_PROCESS.StartProcess(process_seq.nextval, 'Starting process to create new employee (BL_EMPLOYEES.CreateNewEmployee)');
 
+      DL_LOGS.SaveLogs(P_logMessage => 'Building employee record',P_logDbmessage => Null,P_logDate => Sysdate);
+
       BuildEmployeeRecord;
+      
+      DL_LOGS.SaveLogs(P_logMessage => 'Checkin if the employee already exists',P_logDbmessage => Null,P_logDate => Sysdate);
       
       V_EmpCheck := DL_EMPLOYEES.GetEmployeeByNAme(V_Employee.First_name, V_Employee.Last_name);
       
       If V_EmpCheck.EmpId Is Null Then
   
+         DL_LOGS.SaveLogs(P_logMessage => 'Employee not found',P_logDbmessage => Null,P_logDate => Sysdate);
+
+         DL_LOGS.SaveLogs(P_logMessage => 'Saving employee',P_logDbmessage => Null,P_logDate => Sysdate);
+
          DL_EMPLOYEES.SaveEmployee(V_Employee);
 
       Else
       
+         DL_LOGS.SaveLogs(P_logMessage => 'Employee already exists', P_logDbmessage => Null, P_logDate => Sysdate);
+      
          dbms_output.put_line('The Employee already exists in the database.');
       
       End If;
+      
+      DL_LOGS.SaveLogs(P_logMessage => 'Finishing procedure BL_EMPLOYEES.CreateNewEmployee', P_logDbmessage => Null,P_logDate => Sysdate);
+      
 
+   Exception
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting BL_EMPLOYEES.CreateNewEmployee, an error has occurred while procedure execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'An error has occurred while CreateNewEmployee procedure execution. Check the logs.',True);
    End CreateNewEmployee;
 
 END BL_EMPLOYEES;
