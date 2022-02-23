@@ -1,14 +1,14 @@
 CREATE OR REPLACE PACKAGE BL_EMPLOYEES IS
 
-   Procedure CreateNewEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer);
+   Procedure CreateNewEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer, P_ResponseMessage Out Varchar2);
 
-   Procedure UpdateEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer);
+   Procedure UpdateEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer, P_ResponseMessage Out Varchar2);
 
 END BL_EMPLOYEES;
 /
 CREATE OR REPLACE PACKAGE BODY BL_EMPLOYEES IS
 
-   Procedure CreateNewEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer) Is
+   Procedure CreateNewEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer, P_ResponseMessage Out Varchar2) Is
 
       
       V_Employee Employees%Rowtype Default P_EmployeeRec;
@@ -55,7 +55,7 @@ CREATE OR REPLACE PACKAGE BODY BL_EMPLOYEES IS
          Raise_Application_Error(-20001,'An error has occurred while CreateNewEmployee procedure execution. Check the logs.',True);
    End CreateNewEmployee;
 
-   Procedure UpdateEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer) Is
+   Procedure UpdateEmployee(P_EmployeeRec Employees%Rowtype, P_ProcessResponse Out Pls_Integer, P_ResponseMessage Out Varchar2) Is
    
       V_Employee Employees%Rowtype Default P_EmployeeRec;
       

@@ -248,7 +248,7 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
 
          Insert Into Employees Values v_EmployeeRec;
          
-         DL_LOGS.SaveLogs(P_logMessage => 'Commiting. '||Sql%Rowcount||' row(s) afcted.', P_logDbmessage => Null, P_logDate => Sysdate);
+         DL_LOGS.SaveLogs(P_logMessage => 'Commiting. '||Sql%Rowcount||' row(s) afected.', P_logDbmessage => Null, P_logDate => Sysdate);
          
          Commit;
 
