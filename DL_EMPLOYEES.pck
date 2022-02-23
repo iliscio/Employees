@@ -23,6 +23,10 @@ CREATE OR REPLACE PACKAGE DL_EMPLOYEES IS
    Function GetEmployeeById(P_EmployeeId Number) Return TEmployeeRec;
 
    Function GetEmployeeById_Ref(P_EmployeeId Number) Return TEmployeesRef;
+   
+   Function GetEmployeeByName_Ref(P_EmpFirstName Employees.first_name%Type, P_EmpLastName Employees.last_name%Type) Return TEmployeesRef;
+   
+   Function GetEmployeeByName(P_EmpFirstName Employees.first_name%Type, P_EmpLastName Employees.last_name%Type) Return TEmployeeRec;
 
    Procedure SaveEmployee(P_EmployeeRec Employees%Rowtype);
 
@@ -31,6 +35,91 @@ CREATE OR REPLACE PACKAGE DL_EMPLOYEES IS
 END DL_EMPLOYEES;
 /
 CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
+
+
+-- Returns a record of an employee by First_Name and Last_Name
+   Function GetEmployeeByName(P_EmpFirstName Employees.first_name%Type, P_EmpLastName Employees.last_name%Type) Return TEmployeeRec Is
+
+      V_Employee TEmployeeRec;
+
+   Begin
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.GetEmployeeByName function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      V_Employee := Null;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Selecting employee from Employees Table By Name: '||P_EmpFirstName||' '||P_EmpLastName,
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number Into V_Employee
+        From Employees Emp
+       Where Emp.First_Name = P_EmpFirstName
+         And Emp.Last_Name  = P_EmpLastName;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Returning employee data from DL_EMPLOYEES.GetEmployeeByName function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      Return V_Employee;
+
+   Exception
+      When Too_Many_Rows Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Two or more employees was returned by Name: '||P_EmpFirstName||' '||P_EmpLastName,
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'Two or more employees was returned with the same Name. Check the logs.',True);
+      When NO_DATA_FOUND Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'No employee found with Name: '||P_EmpFirstName||' '||P_EmpLastName,
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'No Employee has been found. Check the logs.',True);
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting DL_EMPLOYEES.GetEmployeeByName, an error has occurred while function execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'An error has occurred while GetEmployeeByName function execution. Check the logs.',True);
+   End GetEmployeeByName;
+
+
+-- Returns a Ref Cursor of an employee by First_Name and Last_Name
+   Function GetEmployeeByName_Ref(P_EmpFirstName Employees.first_name%Type, P_EmpLastName Employees.last_name%Type) Return TEmployeesRef Is
+
+      C_Employee TEmployeesRef;
+
+   Begin
+   
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.GetEmployeeByName_Ref function',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      C_Employee := Null;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Opening the cursor with Name: '||P_EmpFirstName||' '||P_EmpLastName,
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      Open C_Employee For Select Emp.Employee_Id, Emp.First_Name, Emp.Last_Name, Emp.Email, Emp.Phone_Number
+                            From Employees Emp
+                           Where Emp.First_Name = P_EmpFirstName
+                             And Emp.Last_Name  = P_EmpLastName;
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Returning Memory Reference of data from DL_EMPLOYEES.GetEmployeeByName_Ref',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      Return C_Employee;
+
+   Exception
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting DL_EMPLOYEES.GetEmployeeByName_Ref, an error has occurred while function execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'An error has occurred while GetEmployeeById_Ref function execution. Check the logs.',True);
+   End GetEmployeeByName_Ref;
+
 
 -- Returns a list of all Employees in the database
    Function GetEmployeesList Return TEmployeeList Is
