@@ -7,8 +7,6 @@ END BL_EMPLOYEES;
 /
 CREATE OR REPLACE PACKAGE BODY BL_EMPLOYEES IS
 
-
-
    Procedure CreateNewEmployee(P_FirstName employees.first_name%Type, P_LastName employees.last_name%Type, P_Email employees.email%Type
                               ,P_PhoneNumber employees.Phone_Number%Type, P_HireDate employees.hire_date%Type, P_JobId employees.job_id%Type
                               ,P_Salary employees.Salary%Type, P_ComissionPct employees.commission_pct%Type, P_ManagerId employees.manager_id%Type
@@ -38,6 +36,8 @@ CREATE OR REPLACE PACKAGE BODY BL_EMPLOYEES IS
       End BuildEmployeeRecord;
            
    Begin
+
+      DL_PROCESS.StartProcess(process_seq.nextval, 'Starting process to create new employee (BL_EMPLOYEES.CreateNewEmployee)');
 
       BuildEmployeeRecord;
       
