@@ -194,9 +194,25 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
    
    Begin
    
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.SaveEmployee procedure',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Checking if the Employee_id is null',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+   
       If v_EmployeeRec.Employee_Id Is Not Null Then
       
+         DL_LOGS.SaveLogs(P_logMessage   => 'Updating the records with the employee_id: '||v_EmployeeRec.Employee_Id,
+                          P_logDbmessage => Null,
+                          P_logDate      => Sysdate);
+      
          Update Employees Set Row = v_EmployeeRec Where Employee_Id = v_EmployeeRec.Employee_Id;
+
+         DL_LOGS.SaveLogs(P_logMessage   => 'Commiting. '||Sql%Rowcount||' rows updated.',
+                          P_logDbmessage => Null,
+                          P_logDate      => Sysdate);
 
          Commit;
 
@@ -204,12 +220,30 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
 
          v_EmployeeRec.Employee_Id := EMPLOYEES_SEQ.nextval;
 
+         DL_LOGS.SaveLogs(P_logMessage   => 'Inserting record at employees table with id: '||v_EmployeeRec.Employee_Id,
+                          P_logDbmessage => Null,
+                          P_logDate      => Sysdate);
+
          Insert Into Employees Values v_EmployeeRec;
+         
+         DL_LOGS.SaveLogs(P_logMessage   => 'Commiting. '||Sql%Rowcount||' row(s) afcted.',
+                          P_logDbmessage => Null,
+                          P_logDate      => Sysdate);
          
          Commit;
 
       End If;
+      
+      DL_LOGS.SaveLogs(P_logMessage   => 'Finishing the procedure DL_EMPLOYEES.SaveEmployee',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
    
+   Exception
+      When Others Then
+         DL_LOGS.SaveLogs(P_logMessage   => 'Aborting DL_EMPLOYEES.SaveEmployee, an error has occurred while procedure execution',
+                          P_logDbmessage => Sqlerrm,
+                          P_logDate      => Sysdate);
+         Raise_Application_Error(-20001,'An error has occurred while SaveEmployee procedure execution. Check the logs.',True);
    End SaveEmployee;
 
 
@@ -218,9 +252,25 @@ CREATE OR REPLACE PACKAGE BODY DL_EMPLOYEES IS
    
    Begin
    
+      DL_LOGS.SaveLogs(P_logMessage   => 'Starting DL_EMPLOYEES.DeleteEmployeeById procedure',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+
+      DL_LOGS.SaveLogs(P_logMessage   => 'Deleting records with employee_id: '||P_EmployeeId,
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+   
       Delete Employees Where Employee_id = P_EmployeeId;
       
+      DL_LOGS.SaveLogs(P_logMessage   => 'Commiting. '||Sql%Rowcount||' row(s) deleted.',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
+      
       Commit;
+      
+      DL_LOGS.SaveLogs(P_logMessage   => 'Finishing the procedure DL_EMPLOYEES.DeleteEmployeeById',
+                       P_logDbmessage => Null,
+                       P_logDate      => Sysdate);
    
    End DeleteEmployeeById;
 
